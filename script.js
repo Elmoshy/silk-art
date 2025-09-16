@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         undoBtn: document.getElementById('undo'),
         saveBtn: document.getElementById('save'),
         randomBtn: document.getElementById('random'),
-        // Palettes removed
     };
 
     // --- Application State ---
@@ -35,8 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         paths: [],
         dpr: window.devicePixelRatio || 1,
         gradShift: 0,
-        neonPulse: 0, // New state for neon animation
-        neonDirection: 1, // New state for neon animation direction
         settings: {
             symmetry: 6,
             size: 2,
@@ -165,9 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
         drawCtx.strokeStyle = color;
         drawCtx.shadowColor = color;
         
-        // Neon glow animation: shadowBlur pulses
-        const animatedGlow = s.glow * (0.8 + Math.sin(state.neonPulse) * 0.2); // Glow pulses between 80% and 120% of set glow
-        drawCtx.shadowBlur = animatedGlow;
+        // Neon glow is now static for better performance
+        drawCtx.shadowBlur = s.glow;
 
         // --- Draw all symmetrical segments ---
         for (let i = 0; i < s.symmetry; i++) {
@@ -189,8 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         drawCtx.save();
         drawCtx.clearRect(0, 0, w, h);
         
-        // No global rotation as per request
-
         for (const p of state.paths) {
             drawPath(p.points, p.settings);
         }
@@ -198,24 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function mainLoop() {
-        let shouldRedraw = false;
-        
+        // Only redraw if the gradient speed is active. This saves a lot of power.
         if (state.settings.gradSpeed > 0) {
             state.gradShift += state.settings.gradSpeed;
-            shouldRedraw = true;
-        }
-
-        // Animate neon pulse for glow
-        state.neonPulse += 0.05 * state.neonDirection; // Adjust speed as needed
-        if (state.neonPulse > Math.PI * 2) {
-            state.neonPulse = 0; // Reset to loop smoothly
-            // state.neonDirection *= -1; // Optionally reverse direction
-        }
-        shouldRedraw = true; // Always redraw for glow animation
-
-        if (shouldRedraw) {
             redrawAll();
         }
+        
+        // The neon pulse animation was removed to fix performance issues on mobile.
+        
         requestAnimationFrame(mainLoop);
     }
     
@@ -279,8 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateUIFromState();
             saveSettings();
         };
-
-        // Palettes removed, so no event listeners for them
 
         // --- Drawing Event Listeners ---
         function getPointerPos(e) {
