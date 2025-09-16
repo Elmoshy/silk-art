@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="تطبيق رسم ماندالا متوهجة تفاعلي يسمح لك بإنشاء أعمال فنية ساحرة بسهولة.">
+    <title>فن الأضواء الساحرة - رسم ماندالا</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <div class="canvas-container">
+            <canvas id="bgCanvas"></canvas>
+            <canvas id="drawCanvas"></canvas>
+        </div>
+
+        <div class="controls" id="sidebar">
+            <button class="toggle-btn" id="toggleBtn" title="إخفاء/إظهار القائمة">
+                <div class="bar bar1"></div>
+                <div class="bar bar2"></div>
+                <div class="bar bar3"></div>
+            </button>
+
+            <h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 8px;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg> إعدادات الرسم</h3>
+            
+            <div class="preview" id="brushPreview"></div>
+            
+            <div class="row">
+                <label for="sym">التكرار</label>
+                <input id="sym" type="range" min="1" max="20" value="3">
+                <span class="value" id="symVal">3</span>
+            </div>
+            
+            <div class="row">
+                <label for="size">سمك الخط</label>
+                <input id="size" type="range" min="0.5" max="30" step="0.5" value="2">
+                <span class="value" id="sizeVal">2.0</span>
+            </div>
+            
+            <div class="row">
+                <label for="glow">التوهج</label>
+                <input id="glow" type="range" min="0" max="60" value="10"> <span class="value" id="glowVal">10</span>
+            </div>
+
+            <div class="row">
+                <label for="fade">الشفافية</label>
+                <input id="fade" type="range" min="0" max="1" step="0.01" value="0">
+                <span class="value" id="fadeVal">0.00</span>
+            </div>
+            
+            <div class="row">
+                <label for="gradSpeed">تدرج متحرك</label>
+                <input id="gradSpeed" type="range" min="0" max="5" step="0.1" value="0.5">
+                <span class="value" id="gradVal">0.5</span>
+            </div>
+            
+            <div class="row">
+                <label for="col">اللون</label>
+                <input id="col" type="color" value="#00ffff">
+                <button id="random" class="small" title="لون عشوائي">🎲</button>
+            </div>
+            
+            <div class="row">
+                <button id="undo" class="action-button" title="تراجع عن آخر خطوة">تراجع</button>
+                <button id="clear" class="action-button" title="مسح كل الرسم">مسح</button>
+                <button id="save" class="action-button" title="حفظ الرسمة كصورة">حفظ</button>
+            </div>
+            
+            <div class="footer">
+                إسحب وارسم — الشكل يتكرر تلقائيًا
+                <div>by <strong>ELMOSHY</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
