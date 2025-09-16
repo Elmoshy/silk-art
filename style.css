@@ -241,30 +241,6 @@ button:hover {
     transition: background 0.3s;
 }
 
-/* Palettes removed from here */
-/* .palettes {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    border-top: 1px solid var(--glass);
-    padding-top: 12px;
-}
-
-.palette {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid var(--text);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.palette:hover {
-    transform: scale(1.15);
-    box-shadow: 0 0 12px var(--accent);
-} */
-
 /* --- Footer --- */
 .footer {
     margin-top: auto;
@@ -288,11 +264,13 @@ button:hover {
         left: 20px;
         top: 15px; bottom: 15px;
         padding: 16px;
-        transform: translateY(-120%);
+        /* When not hidden, it's visible at its normal position */
+        transform: translateY(0);
     }
 
     .controls.hidden {
-        transform: translateY(120%);
+        /* This overrides the desktop's translateX and hides it upwards on mobile */
+        transform: translateY(calc(-100% - 30px));
     }
 
     .toggle-btn {
