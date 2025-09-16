@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فن الأضواء الساحرة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0A0A10;
+            --panel: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.15);
+            --text: #E0E0E0;
+            --accent: #00ffff;
+            font-family: "Cairo", sans-serif;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+        .app {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            padding: 0;
+        }
+        .canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            touch-action: none;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            top: 24px;
+            bottom: 24px;
+            right: 24px;
+            width: 340px;
+            padding: 24px;
+            border-radius: 20px;
+            background: var(--panel);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.4s ease, width 0.4s ease;
+        }
+        .controls.hidden {
+            transform: translateX(calc(100% + 24px));
+        }
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            left: -50px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: var(--glass);
+            color: var(--text);
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0; /* إضافة: لإزالة أي مسافة داخلية */
+            flex-direction: column; /* إضافة: لتنسيق أشرطة الهامبرغر */
+        }
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .bar {
+            width: 25px;
+            height: 3px;
+            background-color: var(--text);
+            margin: 2px 0;
+            transition: all 0.4s ease;
+        }
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        label {
+            font-size: 15px;
+            font-weight: 600;
+            min-width: 90px;
+            color: var(--accent);
+        }
+        input[type=range] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 12px;
+            background: var(--glass);
+            border-radius: 6px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: #fff;
+        }
+        .value {
+            font-size: 14px;
+            min-width: 25px;
+            text-align: left;
+            color: var(--text);
+        }
+        input[type=color] {
+            -webkit-appearance: none;
+            border: none;
+            background: transparent;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            padding: 0;
+        }
+        input[type=color]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type=color]::-webkit-color-swatch {
+            border: none;
+            border-radius: 8px;
+        }
+        button {
+            background: linear-gradient(180deg, var(--accent), #00aaff);
+            color: var(--bg);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background: linear-gradient(180deg, #00ffff, #00aaff);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .action-button {
+            flex: 1;
+            padding: 12px 10px;
+            text-align: center;
+            border-radius: 8px;
+            height: auto;
+            width: auto;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--bg);
+            background: linear-gradient(135deg, #00d4ff, #0994cc);
+            border: 2px solid var(--text);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        .action-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: linear-gradient(135deg, #00eaff, #0acaff);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+        #undo.action-button { background: linear-gradient(135deg, #ff6b6b, #ee4a4a); border-color: #fdd; }
+        #clear.action-button { background: linear-gradient(135deg, #ffc300, #e0a800); border-color: #ffe;}
+        #save.action-button { background: linear-gradient(135deg, #4CAF50, #388E3C); border-color: #cfc; }
+        .small {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            font-size: 18px;
+            border-radius: 50%;
+        }
+        .preview {
+            width: 100%;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--glass);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .palettes {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .palette {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--text);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .palette:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        .footer {
+            margin-top: auto;
+            font-size: 13px;
+            opacity: 0.6;
+            text-align: center;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .footer strong {
+            color: var(--accent);
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        /* --- تعديلات Mobile Responsive --- */
+        @media (max-width: 768px) {
+            .controls {
+                width: 90vw;
+                right: 5vw;
+                left: auto;
+                top: 10px;
+                bottom: 10px;
+                padding: 16px;
+                transform: translateX(0);
+                transition: transform 0.4s ease;
+            }
+            .controls.hidden {
+                transform: translateX(100vw);
+            }
+            .toggle-btn {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                left: auto;
+                z-index: 11;
+                background: var(--glass);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                transition: transform 0.4s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+            }
+            /* إخفاء شريط الهامبرغر عند فتح القائمة */
+            .controls:not(.hidden) .toggle-btn {
+                transform: translateX(calc(100% + 24px)); /* إخفاء الزرار مع القائمة */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="canvas-container">
+            <canvas id="bgCanvas"></canvas>
+            <canvas id="drawCanvas"></canvas>
+        </div>
+
+        <div class="controls" id="sidebar">
+            <button class="toggle-btn" id="toggleBtn">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </button>
+            <h3>إعدادات الرسم</h3>
+            <div class="preview" id="brushPreview"></div>
+            <div class="row">
+                <label>التكرار</label>
+                <input id="sym" type="range" min="1" max="12" value="6">
+                <span class="value" id="symVal">6</span>
+            </div>
+            <div class="row">
+                <label>سمك الخط</label>
+                <input id="size" type="range" min="0.5" max="30" step="0.5" value="2">
+                <span class="value" id="sizeVal">2</span>
+            </div>
+            <div class="row">
+                <label>التوهج</label>
+                <input id="glow" type="range" min="0" max="60" value="2">
+                <span class="value" id="glowVal">2</span>
+            </div>
+            <div class="row">
+                <label>الشفافية</label>
+                <input id="fade" type="range" min="0" max="1" step="0.01" value="0">
+                <span class="value" id="fadeVal">0.00</span>
+            </div>
+            <div class="row">
+                <label>تدرج متحرك</label>
+                <input id="gradSpeed" type="range" min="0" max="5" step="0.1" value="0">
+                <span class="value" id="gradVal">0.0</span>
+            </div>
+            <div class="row">
+                <label>اللون</label>
+                <input id="col" type="color" value="#00ffff">
+                <button id="random" class="small">🎲</button>
+            </div>
+            <div class="palettes">
+                <div class="palette" style="background:linear-gradient(45deg,#ff0,#f00);" data-colors="#ff0,#f00"></div>
+                <div class="palette" style="background:linear-gradient(45deg,#0ff,#00f);" data-colors="#0ff,#00f"></div>
+                <div class="palette" style="background:linear-gradient(45deg,#0f0,#ff0);" data-colors="#0f0,#ff0"></div>
+                <div class="palette" style="background:linear-gradient(45deg,#f0f,#0ff);" data-colors="#f0f,#0ff"></div>
+                <div class="palette" style="background:linear-gradient(45deg,#0f0,#f0f);" data-colors="#0f0,#f0f"></div>
+                <div class="palette" style="background:linear-gradient(45deg,#88f,#f88);" data-colors="#88f,#f88"></div>
+            </div>
+            <div class="row">
+                <button id="undo" class="action-button">تراجع</button>
+                <button id="clear" class="action-button">مسح</button>
+                <button id="save" class="action-button">حفظ</button>
+            </div>
+            <div class="footer">
+                إسحب وارسم — الشكل يتكرر تلقائيًا
+                <div>by <strong>ELMOSHY</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bgCanvas = document.getElementById("bgCanvas");
+            const bgCtx = bgCanvas.getContext("2d");
+            const drawCanvas = document.getElementById("drawCanvas");
+            const drawCtx = drawCanvas.getContext("2d");
+
+            const sidebar = document.getElementById("sidebar");
+            const toggleBtn = document.getElementById("toggleBtn");
+            const controls = {
+                sym: document.getElementById('sym'),
+                symVal: document.getElementById('symVal'),
+                size: document.getElementById('size'),
+                sizeVal: document.getElementById('sizeVal'),
+                glow: document.getElementById('glow'),
+                glowVal: document.getElementById('glowVal'),
+                fade: document.getElementById('fade'),
+                fadeVal: document.getElementById('fadeVal'),
+                gradSpeed: document.getElementById('gradSpeed'),
+                gradVal: document.getElementById('gradVal'),
+                color: document.getElementById('col'),
+                preview: document.getElementById('brushPreview'),
+                clearBtn: document.getElementById('clear'),
+                undoBtn: document.getElementById('undo'),
+                saveBtn: document.getElementById('save'),
+                randomBtn: document.getElementById('random'),
+                palettes: document.querySelectorAll(".palette")
+            };
+
+            const state = {
+                drawing: false,
+                pointerId: null,
+                lastPoints: [],
+                paths: [],
+                dpr: window.devicePixelRatio || 1,
+                sidebarVisible: true,
+                gradShift: 0,
+                settings: {
+                    symmetry: parseInt(controls.sym.value),
+                    size: parseFloat(controls.size.value),
+                    glow: parseInt(controls.glow.value),
+                    fadeAlpha: parseFloat(controls.fade.value),
+                    color: controls.color.value,
+                    gradSpeed: parseFloat(controls.gradSpeed.value)
+                }
+            };
+
+            function updateUI() {
+                controls.symVal.textContent = state.settings.symmetry;
+                controls.sizeVal.textContent = state.settings.size.toFixed(1);
+                controls.glowVal.textContent = state.settings.glow;
+                controls.fadeVal.textContent = state.settings.fadeAlpha.toFixed(2);
+                controls.gradVal.textContent = state.settings.gradSpeed.toFixed(1);
+                controls.preview.style.background = state.settings.color;
+            }
+
+            function resizeCanvas() {
+                const r = drawCanvas.parentElement.getBoundingClientRect();
+                [bgCanvas, drawCanvas].forEach(c => {
+                    c.width = r.width * state.dpr;
+                    c.height = r.height * state.dpr;
+                });
+                bgCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+                drawCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+
+                const g = bgCtx.createRadialGradient(r.width/2, r.height/2, 100, r.width/2, r.height/2, r.width/1.2);
+                g.addColorStop(0, "#222");
+                g.addColorStop(1, "#000");
+                bgCtx.fillStyle = g;
+                bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+                redrawAll();
+            }
+
+            function drawPath(points, s) {
+                if (points.length < 2) return;
+                const w = drawCanvas.width / state.dpr;
+                const h = drawCanvas.height / state.dpr;
+                const cx = w / 2, cy = h / 2;
+                drawCtx.lineCap = 'round';
+                drawCtx.lineJoin = 'round';
+                drawCtx.lineWidth = s.size;
+                
+                drawCtx.globalAlpha = 1 - s.fadeAlpha;
+
+                let color = s.color;
+                if (s.gradSpeed > 0) {
+                    state.gradShift += s.gradSpeed;
+                    const g = drawCtx.createLinearGradient(0, 0, w, 0);
+                    g.addColorStop(0, `hsl(${ (state.gradShift) % 360 },80%,60%)`);
+                    g.addColorStop(1, `hsl(${ (state.gradShift + 120) % 360 },80%,60%)`);
+                    color = g;
+                }
+
+                drawCtx.strokeStyle = color;
+                drawCtx.shadowColor = s.color;
+                drawCtx.shadowBlur = s.glow;
+                drawCtx.globalCompositeOperation = 'lighter';
+
+                for (let i = 0; i < s.symmetry; i++) {
+                    const angle = i * 2 * Math.PI / s.symmetry;
+
+                    drawCtx.save();
+                    drawCtx.translate(cx, cy);
+                    drawCtx.rotate(angle);
+                    drawCtx.translate(-cx, -cy);
+                    drawCtx.beginPath();
+                    drawCtx.moveTo(points[0].x, points[0].y);
+                    for (let j = 1; j < points.length; j++) {
+                        const midx = (points[j-1].x + points[j].x) / 2;
+                        const midy = (points[j-1].y + points[j].y) / 2;
+                        drawCtx.quadraticCurveTo(points[j-1].x, points[j-1].y, midx, midy);
+                    }
+                    drawCtx.stroke();
+                    drawCtx.restore();
+
+                    drawCtx.save();
+                    drawCtx.translate(cx, cy);
+                    drawCtx.rotate(angle);
+                    drawCtx.scale(-1, 1);
+                    drawCtx.translate(-cx, -cy);
+                    drawCtx.beginPath();
+                    drawCtx.moveTo(points[0].x, points[0].y);
+                    for (let j = 1; j < points.length; j++) {
+                        const midx = (points[j-1].x + points[j].x) / 2;
+                        const midy = (points[j-1].y + points[j].y) / 2;
+                        drawCtx.quadraticCurveTo(points[j-1].x, points[j-1].y, midx, midy);
+                    }
+                    drawCtx.stroke();
+                    drawCtx.restore();
+                }
+                drawCtx.globalCompositeOperation = 'source-over';
+                
+                drawCtx.globalAlpha = 1;
+            }
+
+            function redrawAll() {
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                for (const p of state.paths) {
+                    drawPath(p.points, p.settings);
+                }
+            }
+
+            function mainLoop() {
+                if (state.drawing && state.lastPoints.length > 1) {
+                    drawPath(state.lastPoints, state.settings);
+                }
+                requestAnimationFrame(mainLoop);
+            }
+
+            function setupEventHandlers() {
+                toggleBtn.onclick = () => {
+                    sidebar.classList.toggle("hidden");
+                };
+
+                Object.keys(controls).forEach(key => {
+                    if (controls[key] && controls[key].type === 'range') {
+                        controls[key].oninput = e => {
+                            const value = parseFloat(e.target.value);
+                            if (key === 'sym') {
+                                state.settings.symmetry = parseInt(value);
+                            } else if (key === 'fade') {
+                                state.settings.fadeAlpha = value;
+                            } else {
+                                state.settings[key] = value;
+                            }
+                            updateUI();
+                        };
+                    }
+                });
+                
+                controls.color.oninput = e => { state.settings.color = e.target.value; updateUI(); };
+
+                controls.clearBtn.onclick = () => {
+                    state.paths = [];
+                    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                };
+
+                controls.undoBtn.onclick = () => {
+                    state.paths.pop();
+                    redrawAll();
+                };
+
+                controls.saveBtn.onclick = () => {
+                    const tempCanvas = document.createElement("canvas");
+                    tempCanvas.width = bgCanvas.width;
+                    tempCanvas.height = bgCanvas.height;
+                    const tempCtx = tempCanvas.getContext("2d");
+                    tempCtx.drawImage(bgCanvas, 0, 0);
+                    tempCtx.drawImage(drawCanvas, 0, 0);
+                    const link = document.createElement("a");
+                    link.download = "art.png";
+                    link.href = tempCanvas.toDataURL("image/png");
+                    link.click();
+                };
+
+                controls.randomBtn.onclick = () => {
+                    const randomColor = `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+                    state.settings.color = randomColor;
+                    controls.color.value = randomColor;
+                    updateUI();
+                };
+
+                controls.palettes.forEach(p => {
+                    p.onclick = () => {
+                        const cols = p.dataset.colors.split(",");
+                        state.settings.color = cols[0];
+                        controls.color.value = cols[0];
+                        updateUI();
+                    };
+                });
+
+                function pos(e) {
+                    const r = drawCanvas.getBoundingClientRect();
+                    if (e.touches) e = e.touches[0];
+                    return { x: (e.clientX - r.left), y: (e.clientY - r.top) };
+                }
+
+                function startDraw(e) {
+                    e.preventDefault();
+                    if (window.innerWidth <= 768 && !sidebar.classList.contains('hidden')) {
+                        return;
+                    }
+                    state.drawing = true;
+                    state.lastPoints = [pos(e)];
+                    state.paths.push({ points: state.lastPoints, settings: { ...state.settings } });
+                }
+                function moveDraw(e) {
+                    if (!state.drawing) return;
+                    state.lastPoints.push(pos(e));
+                }
+                function endDraw() { state.drawing = false; }
+
+                drawCanvas.addEventListener("mousedown", startDraw);
+                drawCanvas.addEventListener("mousemove", moveDraw);
+                window.addEventListener("mouseup", endDraw);
+
+                drawCanvas.addEventListener("touchstart", startDraw, { passive: false });
+                drawCanvas.addEventListener("touchmove", moveDraw, { passive: false });
+                window.addEventListener("touchend", endDraw);
+            }
+
+            window.addEventListener("resize", resizeCanvas);
+            updateUI();
+            resizeCanvas();
+            setupEventHandlers();
+            mainLoop();
+        });
+    </script>
+</body>
+</html>
